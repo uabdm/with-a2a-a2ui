@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { A2UI_SCHEMA } from './uiSchema.js';
 
 // Better environment variable loading
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,7 +29,43 @@ app.use('/api/copilotkit', (req, res, next) => {
         const serviceAdapter = new GoogleGenerativeAIAdapter({
             model: genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
         });
-        const runtime = new CopilotRuntime();
+
+        const runtime = new CopilotRuntime({
+            actions: ({ properties, url }) => {
+                return [
+                    {
+                        name: "render_ui",
+                        description: "Call this tool to render a UI for the user. Use this when the user asks to see applications, news, reports, or any visual information. Provide the UI tree as a JSON object matching the A2UI schema with a surfaceUpdate containing components.",
+                        parameters: [
+                            {
+                                name: "surfaceUpdate",
+                                type: "object",
+                                description: "The A2UI surface update payload containing the UI components",
+                                required: true,
+                                attributes: [
+                                    {
+                                        name: "surfaceId",
+                                        type: "string",
+                                        description: "Unique identifier for this UI surface",
+                                        required: true
+                                    },
+                                    {
+                                        name: "components",
+                                        type: "object[]",
+                                        description: "Array of UI components to render",
+                                        required: true
+                                    }
+                                ]
+                            }
+                        ],
+                        handler: async ({ surfaceUpdate }) => {
+                            console.log("Rendering UI:", JSON.stringify(surfaceUpdate, null, 2));
+                            return { success: true, rendered: surfaceUpdate };
+                        }
+                    }
+                ];
+            }
+        });
 
         const handler = copilotRuntimeNodeHttpEndpoint({
             endpoint: '/',
