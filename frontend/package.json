@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@a2ui/lit": "^0.8.1",
+    "@copilotkit/a2ui-renderer": "^1.51.2",
     "@copilotkit/react-core": "^1.51.2",
     "@copilotkit/react-ui": "^1.51.2",
     "@emotion/react": "^11.14.0",
